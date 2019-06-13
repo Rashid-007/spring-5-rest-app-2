@@ -5,13 +5,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import throne.springreacto.spring5restapp2.api.v1.model.CustomerDTO;
 import throne.springreacto.spring5restapp2.api.v1.model.CustomerListDTO;
 import throne.springreacto.spring5restapp2.services.CustomerService;
 
 @Controller
-@RequestMapping("/api/v1/customers/")
+@RequestMapping("/api/v1/customers")
 public class CustomerController {
     private final CustomerService customerService;
 
@@ -29,5 +32,13 @@ public class CustomerController {
         return new ResponseEntity<>(customerService.getCustomerById(id), HttpStatus.OK);
     }
 
+    @PostMapping
+    public ResponseEntity<CustomerDTO> createCustomer(@RequestBody CustomerDTO customerDTO){
+        return new ResponseEntity<>(customerService.createNewCustomer(customerDTO), HttpStatus.CREATED);
+    }
 
+    @PutMapping("{id}")
+    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerDTO customerDTO){
+        return new ResponseEntity<>(customerService.updateCustomer(id, customerDTO), HttpStatus.OK);
+    }
 }

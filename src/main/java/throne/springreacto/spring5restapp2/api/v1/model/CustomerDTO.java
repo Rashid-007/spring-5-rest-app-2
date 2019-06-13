@@ -1,5 +1,6 @@
 package throne.springreacto.spring5restapp2.api.v1.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,6 @@ import lombok.NoArgsConstructor;
 public class CustomerDTO {
     private String firstname;
     private String lastname;
-
+    @JsonProperty("customer_url")
     private String customerUrl;
 }

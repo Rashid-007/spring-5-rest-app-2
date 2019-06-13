@@ -25,8 +25,7 @@ public class CustomerServiceImplTest {
     public static final String LASTNAME = "Mueller";
     @Mock
     CustomerRepository customerRepository;
-    //@Mock
-    //CustomerMapper customerMapper;
+
     CustomerService sut;
 
 
@@ -77,7 +76,7 @@ public class CustomerServiceImplTest {
         savedCustomer.setFirstname(customerDTO.getFirstname());
         savedCustomer.setLastname(customerDTO.getLastname());
 
-        when(customerRepository.save(any())).thenReturn(savedCustomer);
+        when(customerRepository.save(any(Customer.class))).thenReturn(savedCustomer);
 
         //when
         CustomerDTO newCustomer = sut.createNewCustomer(customerDTO);
@@ -86,5 +85,26 @@ public class CustomerServiceImplTest {
         assertNotNull(newCustomer);
         assertEquals(FIRSTNAME, newCustomer.getFirstname());
         assertEquals(LASTNAME, newCustomer.getLastname());
+    }
+
+    @Test
+    public void testUpdateCustomer(){
+
+        CustomerDTO customerDto = new CustomerDTO();
+        customerDto.setFirstname(FIRSTNAME);
+        customerDto.setLastname(LASTNAME);
+
+        Customer savedCustomer= new Customer();
+        savedCustomer.setId(ID);
+        savedCustomer.setFirstname(customerDto.getFirstname());
+        savedCustomer.setLastname(customerDto.getLastname());
+
+        when(customerRepository.save(any(Customer.class))).thenReturn(savedCustomer);
+
+        CustomerDTO result = sut.updateCustomer(ID, customerDto);
+
+        assertNotNull(result);
+        assertEquals(FIRSTNAME, result.getFirstname());
+        assertEquals(LASTNAME, result.getLastname());
     }
 }
