@@ -12,15 +12,18 @@ import throne.springreacto.spring5restapp2.repositories.CustomerRepository;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class CustomerServiceImplTest {
+public class CustomerServiceTest {
 
 
-    public static final long ID = 1L;
+    public static final Long ID = 1L;
     public static final String FIRSTNAME = "Julian";
     public static final String LASTNAME = "Mueller";
     @Mock
@@ -106,5 +109,13 @@ public class CustomerServiceImplTest {
         assertNotNull(result);
         assertEquals(FIRSTNAME, result.getFirstname());
         assertEquals(LASTNAME, result.getLastname());
+    }
+
+    @Test
+    public void testDeleteCustomerById(){
+
+        sut.deleteCustomer(ID);
+
+        verify(customerRepository, times(1)).deleteById(anyLong());
     }
 }

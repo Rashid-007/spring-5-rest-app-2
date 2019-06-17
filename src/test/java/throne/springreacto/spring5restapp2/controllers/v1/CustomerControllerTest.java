@@ -3,25 +3,26 @@ package throne.springreacto.spring5restapp2.controllers.v1;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import throne.springreacto.spring5restapp2.api.v1.model.CustomerDTO;
-import throne.springreacto.spring5restapp2.domain.Customer;
+import throne.springreacto.spring5restapp2.config.Constants;
 import throne.springreacto.spring5restapp2.services.CustomerService;
 
 import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -61,7 +62,7 @@ public class CustomerControllerTest {
 
         when(customerService.getAllCustomers()).thenReturn(customers);
 
-        mockMvc.perform(get("/api/v1/customers/"))
+        mockMvc.perform(get(Constants.CUSTOMER_BASE_URL))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.customers", hasSize(2)));
     }
@@ -74,7 +75,7 @@ public class CustomerControllerTest {
 
         when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
 
-        mockMvc.perform(get("/api/v1/customers/1"))
+        mockMvc.perform(get(Constants.CUSTOMER_BASE_URL + "/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname", equalTo(FIRSTNAME)));
 
@@ -96,7 +97,7 @@ public class CustomerControllerTest {
 
         String st = objectToJsonStirng(customerDto);
 
-        mockMvc.perform(post("/api/v1/customers/")
+        mockMvc.perform(post(Constants.CUSTOMER_BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON).content(objectToJsonStirng(customerDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstname", equalTo(FIRSTNAME)))
@@ -117,13 +118,45 @@ public class CustomerControllerTest {
 
         when(customerService.updateCustomer(anyLong(), any(CustomerDTO.class))).thenReturn(returnedCustomerDto);
 
-        String st = mockMvc.perform(put("/api/v1/customers/1")
+        String st = mockMvc.perform(put(Constants.CUSTOMER_BASE_URL + "/1")
                 .contentType(MediaType.APPLICATION_JSON).content(objectToJsonStirng(customerDto))).andReturn().getResponse().getContentAsString();
 
-        mockMvc.perform(put("/api/v1/customers/1")
+        mockMvc.perform(put(Constants.CUSTOMER_BASE_URL + "/1")
                 .contentType(MediaType.APPLICATION_JSON).content(objectToJsonStirng(customerDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname", equalTo(FIRSTNAME)))
                 .andExpect(jsonPath("$.customer_url", equalTo(SELF_URL)));
+    }
+
+    @Test
+    public void testPatchCustomer() throws Exception {
+
+        //given
+        CustomerDTO customer = new CustomerDTO();
+        customer.setFirstname("Fred");
+
+        CustomerDTO returnDTO = new CustomerDTO();
+        returnDTO.setFirstname(customer.getFirstname());
+        returnDTO.setLastname("Flintstone");
+        returnDTO.setCustomerUrl(Constants.CUSTOMER_BASE_URL + "/1");
+
+        when(customerService.patchCustomer(anyLong(), any(CustomerDTO.class))).thenReturn(returnDTO);
+
+        mockMvc.perform(patch(Constants.CUSTOMER_BASE_URL + "/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectToJsonStirng(customer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstname", equalTo("Fred")))
+                .andExpect(jsonPath("$.lastname", equalTo("Flintstone")))
+                .andExpect(jsonPath("$.customer_url", equalTo(Constants.CUSTOMER_BASE_URL + "/1")));
+    }
+
+    @Test
+    public void testDeleteCustomer() throws Exception{
+
+        mockMvc.perform(delete(Constants.CUSTOMER_BASE_URL + "/1"))
+                .andExpect(status().isNoContent());
+
+        verify(customerService, times(1)).deleteCustomer(anyLong());
     }
 }

@@ -3,6 +3,7 @@ package throne.springreacto.spring5restapp2.services;
 import org.springframework.stereotype.Component;
 import throne.springreacto.spring5restapp2.api.v1.mapper.CustomerMapper;
 import throne.springreacto.spring5restapp2.api.v1.model.CustomerDTO;
+import throne.springreacto.spring5restapp2.config.Constants;
 import throne.springreacto.spring5restapp2.domain.Customer;
 import throne.springreacto.spring5restapp2.repositories.CustomerRepository;
 
@@ -26,7 +27,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .stream()
                 .map(customer -> {
                     CustomerDTO customerDTO = customerMapper.convertCustomerToCustomerDto(customer);
-                    customerDTO.setCustomerUrl("/api/v1/customers/" + customer.getId());
+                    customerDTO.setCustomerUrl(getCusotmerUrl(customer.getId()));
                     return customerDTO;
                 })
                 .collect(Collectors.toList());
@@ -36,9 +37,9 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDTO getCustomerById(Long id) {
         return customerRepository.findById(id).map(customer -> {
             CustomerDTO customerDTO = customerMapper.convertCustomerToCustomerDto(customer);
-            customerDTO.setCustomerUrl("/api/v1/customers/" + customer.getId());
+            customerDTO.setCustomerUrl(getCusotmerUrl(customer.getId()));
             return customerDTO;
-        }).orElseThrow(() -> new IllegalArgumentException("customer not found"));
+        }).orElseThrow(ResourceNotFoundException::new);
     }
 
     @Override
@@ -55,11 +56,42 @@ public class CustomerServiceImpl implements CustomerService {
         return saveCustomer(customer);
 
     }
+
+    @Override
+    public CustomerDTO patchCustomer(Long id, CustomerDTO customerDTO) {
+        return customerRepository.findById(id).map(customer -> {
+
+            if(customerDTO.getFirstname() != null){
+                customer.setFirstname(customerDTO.getFirstname());
+            }
+
+            if(customerDTO.getLastname() != null){
+                customer.setLastname(customerDTO.getLastname());
+            }
+
+            CustomerDTO returnDto = customerMapper.convertCustomerToCustomerDto(customerRepository.save(customer));
+
+            returnDto.setCustomerUrl(getCusotmerUrl(id));
+
+            return returnDto;
+
+        }).orElseThrow(() -> new ResourceNotFoundException("No customer found with the given ID"));
+    }
+
+    @Override
+    public void deleteCustomer(Long id) {
+        customerRepository.deleteById(id);
+    }
+
     private CustomerDTO saveCustomer(Customer customer){
         Customer savedCustomer = customerRepository.save(customer);
         CustomerDTO customerDTO = customerMapper.convertCustomerToCustomerDto(savedCustomer);
-        customerDTO.setCustomerUrl("/api/v1/customers/" + savedCustomer.getId());
+        customerDTO.setCustomerUrl(getCusotmerUrl(savedCustomer.getId()));
 
         return customerDTO;
+    }
+
+    private String getCusotmerUrl(Long id){
+        return Constants.CUSTOMER_BASE_URL + "/" + id;
     }
 }
