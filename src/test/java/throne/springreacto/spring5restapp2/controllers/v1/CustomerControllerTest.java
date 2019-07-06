@@ -67,7 +67,8 @@ public class CustomerControllerTest {
 
         when(customerService.getAllCustomers()).thenReturn(customers);
 
-        mockMvc.perform(get(Constants.CUSTOMER_BASE_URL))
+        mockMvc.perform(get(Constants.CUSTOMER_BASE_URL)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.customers", hasSize(2)));
     }
@@ -80,7 +81,8 @@ public class CustomerControllerTest {
 
         when(customerService.getCustomerById(anyLong())).thenReturn(customerDTO);
 
-        mockMvc.perform(get(Constants.CUSTOMER_BASE_URL + "/1"))
+        mockMvc.perform(get(Constants.CUSTOMER_BASE_URL + "/1")
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname", equalTo(FIRSTNAME)));
 
@@ -103,6 +105,7 @@ public class CustomerControllerTest {
         objectToJsonStirng(customerDto);
 
         mockMvc.perform(post(Constants.CUSTOMER_BASE_URL)
+                .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectToJsonStirng(customerDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.firstname", equalTo(FIRSTNAME)))
@@ -127,6 +130,7 @@ public class CustomerControllerTest {
                 .contentType(MediaType.APPLICATION_JSON).content(objectToJsonStirng(customerDto))).andReturn().getResponse().getContentAsString();
 
         mockMvc.perform(put(Constants.CUSTOMER_BASE_URL + "/1")
+                .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectToJsonStirng(customerDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstname", equalTo(FIRSTNAME)))
@@ -148,6 +152,7 @@ public class CustomerControllerTest {
         when(customerService.patchCustomer(anyLong(), any(CustomerDTO.class))).thenReturn(returnDTO);
 
         mockMvc.perform(patch(Constants.CUSTOMER_BASE_URL + "/1")
+                .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectToJsonStirng(customer)))
                 .andExpect(status().isOk())
