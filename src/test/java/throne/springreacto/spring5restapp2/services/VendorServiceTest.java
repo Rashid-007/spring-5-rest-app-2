@@ -1,5 +1,6 @@
 package throne.springreacto.spring5restapp2.services;
 
+import org.hibernate.validator.internal.util.logging.formatter.CollectionOfObjectsToStringFormatter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -11,10 +12,16 @@ import throne.springreacto.spring5restapp2.domain.Vendor;
 import throne.springreacto.spring5restapp2.repositories.VendorRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 public class VendorServiceTest {
@@ -30,6 +37,32 @@ public class VendorServiceTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         sut = new VendorServiceImpl(vendorRepository, VendorMapper.INSTANCE);
+    }
+
+    @Test
+    public void testGetVendorById(){
+        //when
+        Vendor vendor = new Vendor();
+        vendor.setName(CORPORATE_NAME);
+
+         when(vendorRepository.findById(anyLong())).thenReturn(Optional.of(vendor));
+
+        //when
+        VendorDto result = sut.getVendorById(anyLong());
+
+        verify(vendorRepository, times(1)).findById(anyLong());
+        assertEquals(CORPORATE_NAME, result.getName());
+    }
+
+    @Test(expected = ResourceNotFoundException.class)
+    public void testGetVendorByIdNotFound(){
+
+        when(vendorRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        sut.getVendorById(anyLong());
+
+        //then
+        //throw exception
     }
 
     @Test
@@ -63,5 +96,23 @@ public class VendorServiceTest {
         assertNotNull(result);
         assertEquals(CORPORATE_NAME, result.getName());
         assertEquals(SELF_URL, result.getVendorUrl());
+    }
+
+    @Test
+    public void testUpdateVendor(){
+
+        VendorDto vendorDto = new VendorDto();
+        vendorDto.setName(CORPORATE_NAME);
+
+        Vendor vendor = new Vendor();
+        vendor.setName(vendorDto.getName());
+
+        when(vendorRepository.save(any(Vendor.class))).thenReturn(vendor);
+
+        VendorDto result = sut.updateVendor(vendorDto, anyLong());
+
+        assertEquals(CORPORATE_NAME, result.getName());
+
+        verify(vendorRepository, times(1)).save(any(Vendor.class));
     }
 }

@@ -47,7 +47,7 @@ public class CustomerServiceImplT {
     @Test
     public void patchCustomerUpdateFirstName() throws Exception {
         String updatedName = "UpdatedName";
-        long id = getCustomerIdValue();
+        Long id = getCustomerIdValue();
         Customer originalCustomer = customerRepository.getOne(id);
 
         assertNotNull(originalCustomer);
@@ -72,7 +72,7 @@ public class CustomerServiceImplT {
     @Test
     public void patchCustomerUpdateLastName() throws Exception {
         String updatedName = "UpdatedName";
-        long id = getCustomerIdValue();
+        Long id = getCustomerIdValue();
 
         Customer originalCustomer = customerRepository.getOne(id);
         assertNotNull(originalCustomer);

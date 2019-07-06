@@ -2,6 +2,7 @@ package throne.springreacto.spring5restapp2.controllers.v1;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
@@ -9,7 +10,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import throne.springreacto.spring5restapp2.api.v1.model.CustomerDTO;
 import throne.springreacto.spring5restapp2.config.Constants;
+import throne.springreacto.spring5restapp2.controllers.RestControllerExceptionHandler;
 import throne.springreacto.spring5restapp2.services.CustomerService;
+import throne.springreacto.spring5restapp2.services.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -33,9 +36,11 @@ public class CustomerControllerTest {
     public static final String FIRSTNAME = "Julian";
     public static final String LASTNAME = "Muelller";
     public static final String SELF_URL = "selfUrl";
+
     @Mock
     CustomerService customerService;
 
+    @InjectMocks
     CustomerController sut;
 
     MockMvc mockMvc;
@@ -43,9 +48,9 @@ public class CustomerControllerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        sut = new CustomerController(customerService);
 
-        mockMvc = MockMvcBuilders.standaloneSetup(sut).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(sut)
+                .setControllerAdvice(new RestControllerExceptionHandler()).build();
     }
 
     @Test
@@ -95,7 +100,7 @@ public class CustomerControllerTest {
 
         when(customerService.createNewCustomer(any())).thenReturn(returnedCustomerDto);
 
-        String st = objectToJsonStirng(customerDto);
+        objectToJsonStirng(customerDto);
 
         mockMvc.perform(post(Constants.CUSTOMER_BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON).content(objectToJsonStirng(customerDto)))
@@ -118,7 +123,7 @@ public class CustomerControllerTest {
 
         when(customerService.updateCustomer(anyLong(), any(CustomerDTO.class))).thenReturn(returnedCustomerDto);
 
-        String st = mockMvc.perform(put(Constants.CUSTOMER_BASE_URL + "/1")
+        mockMvc.perform(put(Constants.CUSTOMER_BASE_URL + "/1")
                 .contentType(MediaType.APPLICATION_JSON).content(objectToJsonStirng(customerDto))).andReturn().getResponse().getContentAsString();
 
         mockMvc.perform(put(Constants.CUSTOMER_BASE_URL + "/1")
@@ -158,5 +163,14 @@ public class CustomerControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(customerService, times(1)).deleteCustomer(anyLong());
+    }
+    @Test
+    public void testNotFoundException() throws Exception {
+
+        when(customerService.getCustomerById(anyLong())).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get(Constants.CUSTOMER_BASE_URL + "/222")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }

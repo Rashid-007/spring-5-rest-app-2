@@ -1,8 +1,8 @@
 package throne.springreacto.spring5restapp2.controllers.v1;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,7 +18,7 @@ import throne.springreacto.spring5restapp2.api.v1.model.CustomerListDTO;
 import throne.springreacto.spring5restapp2.config.Constants;
 import throne.springreacto.spring5restapp2.services.CustomerService;
 
-@Controller
+@Api(description = "This is customer API resource")
 @RestController
 @RequestMapping(Constants.CUSTOMER_BASE_URL)
 public class CustomerController {
@@ -28,6 +28,7 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
+    @ApiOperation(value = "Get list of all customers", notes = "This will get a list of customers")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public CustomerListDTO getCustomers(){

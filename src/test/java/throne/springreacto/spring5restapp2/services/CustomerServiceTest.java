@@ -26,6 +26,7 @@ public class CustomerServiceTest {
     public static final Long ID = 1L;
     public static final String FIRSTNAME = "Julian";
     public static final String LASTNAME = "Mueller";
+
     @Mock
     CustomerRepository customerRepository;
 
